@@ -3,6 +3,7 @@ Building Event-Driven System with NestJS
 
 
 # Architecture
+
 ## Event Storming
 ![img](/docs/event_storming.png)
 
