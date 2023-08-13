@@ -1,6 +1,8 @@
 import { createResource, createSignal, For, onCleanup, Show } from 'solid-js';
+import { UsersPage } from './UsersPage.tsx';
 import 'flowbite';
-const Navbar = ({ logout, currentUser }) => {
+
+const Navbar = ({ logout, currentUser, page, setPage }) => {
   return (
     <>
       <nav class="bg-white border-gray-200 dark:bg-gray-900">
@@ -33,7 +35,12 @@ const Navbar = ({ logout, currentUser }) => {
                 <li>
                   <a
                     href="#tasks"
-                    class="text-gray-900 dark:text-white hover:underline"
+                    onClick={() => setPage('tasks')}
+                    class={
+                      page() === 'tasks'
+                        ? 'text-blue-700 dark:text-white hover:underline'
+                        : 'text-gray-500 dark:text-gray-400 hover:underline'
+                    }
                     aria-current="page"
                   >
                     Task Tracker
@@ -42,7 +49,12 @@ const Navbar = ({ logout, currentUser }) => {
                 <li>
                   <a
                     href="#users"
-                    class="text-gray-900 dark:text-white hover:underline"
+                    onClick={() => setPage('users')}
+                    class={
+                      page() === 'users'
+                        ? 'text-blue-700 dark:text-white hover:underline'
+                        : 'text-gray-500 dark:text-gray-400 hover:underline'
+                    }
                   >
                     Users
                   </a>
@@ -57,20 +69,11 @@ const Navbar = ({ logout, currentUser }) => {
 };
 const User = ({ user }) => {
   const avatarUrl = `https://source.boringavatars.com/beam/120/${user.id}?colors=edd8bb,e2aa87,fef7e1,a2d3c7,ef8e7d`;
-  // component to show user name and avatar
   return (
     <div class="flex items-center">
       <img class="w-4 h-4 rounded-full" src={avatarUrl} alt="Rounded avatar" />
       <div class="ml-1">
-        <div class="text-sm font-medium text-gray-900">
-          {user.name}
-          {/*<span class="mr-2 bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300">*/}
-          {/*  {user.role}*/}
-          {/*</span>*/}
-        </div>
-        {/*<a class="text-sm text-blue-600 underline dark:text-blue-500 hover:no-underline">*/}
-        {/*  {user.email}*/}
-        {/*</a>*/}
+        <div class="text-sm font-medium text-gray-900">{user.name}</div>
       </div>
     </div>
   );
@@ -122,39 +125,20 @@ const TaskCard = ({ task, handleComplete }) => {
           <User user={task.createdBy} />
         </span>
       </div>
-      {/*<p class="mb-3 font-normal text-gray-700 dark:text-gray-400">Here are the biggest enterprise technology acquisitions of 2021 so far, in reverse chronological order.</p>*/}
-      {/*<a href="#" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">*/}
-      {/*  Read more*/}
-      {/*  <svg class="w-3.5 h-3.5 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">*/}
-      {/*    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>*/}
-      {/*  </svg>*/}
-      {/*</a>*/}
     </div>
-
-    // {/*<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">*/}
-    // {/*  <td class="w-4 p-4">*/}
-    // {/*    */}
-    // {/*    </div>*/}
-    // {/*  </td>*/}
-    // {/*  <th*/}
-    // {/*    scope="row"*/}
-    // {/*    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"*/}
-    // {/*  >*/}
-    // {/*    {task.description.slice(0, 40)}*/}
-    // {/*  </th>*/}
-    // {/*  <td class="px-6 py-4">{task.assignedTo.name}</td>*/}
-    // {/*  <td class="px-6 py-4">{task.createdBy.name}</td>*/}
-    // {/*</tr>*/}
   );
 };
 
 const TaskTracker = () => {
   const [filter, setFilter] = createSignal(false);
   const [refreshKey, setRefreshKey] = createSignal(0);
+  const [page, setPage] = createSignal(
+    window.location.hash.slice(1) || 'tasks',
+  );
 
   const [jwtToken] = createSignal(localStorage.getItem('token'));
 
-  let [jwtData, setJwtData] = createSignal(null);
+  const [jwtData, setJwtData] = createSignal(null);
 
   if (jwtToken()) {
     setJwtData(JSON.parse(atob(jwtToken().split('.')[1])));
@@ -171,17 +155,11 @@ const TaskTracker = () => {
       method: 'GET',
       headers: myHeaders,
     };
-    return (
-      fetch('http://localhost:3201/user/me', requestOptions)
-        .then((response) => response.json())
-        .then((response) => JSON.parse(response))
-        // .then((it) => console.log({ it }))
-        // .then((data) => (data.statusCode ? logout() : data))
-        // .then((data) => setTasks(data))
-        .catch((err) => {
-          console.log(err);
-        })
-    );
+    return fetch('http://localhost:3201/user/me', requestOptions)
+      .then((response) => response.json())
+      .catch((err) => {
+        console.log(err);
+      });
   });
 
   // Cleanup function
@@ -273,12 +251,12 @@ const TaskTracker = () => {
     window.location.reload();
   };
 
-  let displayedTasks = () =>
+  const displayedTasks = () =>
     filter()
       ? tasks().filter((task) => task.assignedTo === currentUserID)
       : tasks();
 
-  let button = (type) => {
+  const button = (type) => {
     if (type === 'default') {
       return `text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800`;
     }
@@ -295,9 +273,14 @@ const TaskTracker = () => {
 
   return (
     <div class="dark:bg-gray-900 h-screen w-screen">
-      <Navbar logout={logout} currentUser={currentUser} />
-      {jwtToken() ? (
-        <>
+      <Navbar
+        logout={logout}
+        currentUser={currentUser}
+        page={page}
+        setPage={setPage}
+      />
+      <Show when={jwtToken()} fallback={<button onClick={login}>Login</button>}>
+        <Show when={page() === 'tasks'}>
           <div class="flex pb-4 p-4">
             <button class={button('default')} onClick={handleReassign}>
               Reassign all tasks
@@ -348,10 +331,11 @@ const TaskTracker = () => {
               </For>
             </div>
           </div>
-        </>
-      ) : (
-        <button onClick={login}>Login</button>
-      )}
+        </Show>
+        <Show when={page() === 'users'}>
+          <UsersPage />
+        </Show>
+      </Show>
     </div>
   );
 };
