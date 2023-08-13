@@ -1,11 +1,10 @@
 import { Entity, OneToMany, PrimaryKey, Property } from '@mikro-orm/core';
-import { v4 } from 'uuid';
 import { Task } from './task.entity';
 
 @Entity()
 export class User {
   @PrimaryKey({ type: 'uuid' })
-  id: string = v4();
+  id: string;
 
   @Property()
   name!: string;

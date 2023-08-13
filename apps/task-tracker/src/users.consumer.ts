@@ -1,35 +1,29 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { KafkaConsumerService } from '@app/common/kafka/kafka-consumer.service';
+import { Injectable } from '@nestjs/common';
 import { EachMessagePayload } from 'kafkajs';
 import { UserService } from './services/user.service';
 import { ChangeRoleDto } from './dto/change-role.dto';
 import { TaskTrackerService } from './services/task-tracker.service';
+import { UserRoleEnum } from './models/user-role.enum';
 
 @Injectable()
-export class UsersConsumer implements OnModuleInit {
+export class UsersConsumer {
   constructor(
     private readonly userService: UserService,
-    private readonly consumerService: KafkaConsumerService,
     private readonly taskTrackerService: TaskTrackerService,
   ) {}
 
-  async onModuleInit() {
-    await this.consumerService.consume(
-      { topics: ['users'], fromBeginning: true },
-      { eachMessage: this.handleMessage.bind(this) },
-    );
-  }
+  // Consumer init in UsersCudConsumer
 
   async handleMessage(payload: EachMessagePayload) {
     console.log('Received message', {
-      event: payload.message.value.toString(),
+      event: payload.message.key.toString(),
       value: payload.message.value.toString(),
       topic: payload.topic.toString(),
       partition: payload.partition.toString(),
     });
 
     switch (payload.message.key.toString()) {
-      case 'user_role_changed':
+      case 'user_role_updated':
         await this.handleRoleChange(payload);
         break;
       default:
@@ -40,10 +34,14 @@ export class UsersConsumer implements OnModuleInit {
     const userDataRaw = JSON.parse(payload.message.value.toString());
 
     const changeRoleDto = new ChangeRoleDto();
-    changeRoleDto.role = userDataRaw.role;
-    changeRoleDto.userId = userDataRaw.user;
+    changeRoleDto.role = userDataRaw.newRole;
+    changeRoleDto.userId = userDataRaw.id;
 
-    if (userDataRaw.role === 'employee') {
+    const prevRole = await this.userService
+      .findOne(changeRoleDto.userId)
+      .then((user) => user.role);
+
+    if (prevRole === UserRoleEnum.EMPLOYEE) {
       await this.taskTrackerService.reassignUserTasks(changeRoleDto.userId);
     }
 

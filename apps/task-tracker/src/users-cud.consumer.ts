@@ -4,28 +4,36 @@ import { EachMessagePayload } from 'kafkajs';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './services/user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UsersConsumer } from './users.consumer';
 
 @Injectable()
-export class UserConsumer implements OnModuleInit {
+export class UserCudConsumer implements OnModuleInit {
   constructor(
     private readonly userService: UserService,
     private readonly consumerService: KafkaConsumerService,
+    private readonly usersConsumer: UsersConsumer,
   ) {}
 
   async onModuleInit() {
-    await this.consumerService.consume(
-      { topics: ['users-cud'], fromBeginning: true },
+    this.consumerService.consume(
+      { topics: ['users-cud', 'users'], fromBeginning: true },
       { eachMessage: this.handleMessage.bind(this) },
     );
+    console.log('UserCudConsumer is initialized');
   }
 
   async handleMessage(payload: EachMessagePayload) {
     console.log('Received message', {
-      event: payload.message.value.toString(),
+      event: payload.message.key.toString(),
       value: payload.message.value.toString(),
       topic: payload.topic.toString(),
       partition: payload.partition.toString(),
     });
+
+    if (payload.topic.toString() === 'users') {
+      this.usersConsumer.handleMessage(payload);
+      return;
+    }
 
     switch (payload.message.key.toString()) {
       case 'user_created':
@@ -44,6 +52,8 @@ export class UserConsumer implements OnModuleInit {
   async handleUserCreated(payload: EachMessagePayload) {
     const userDataRaw = JSON.parse(payload.message.value.toString());
     const userDto = new CreateUserDto();
+
+    userDto.id = userDataRaw.id;
     userDto.name = userDataRaw.name;
     userDto.email = userDataRaw.email;
     userDto.role = userDataRaw.role;
@@ -54,8 +64,13 @@ export class UserConsumer implements OnModuleInit {
   async handleUserUpdated(payload: EachMessagePayload) {
     const userDataRaw = JSON.parse(payload.message.value.toString());
     const userDto = new UpdateUserDto();
-    userDto.name = userDataRaw.name;
-    userDto.email = userDataRaw.email;
+
+    if (userDataRaw.name) {
+      userDto.name = userDataRaw.name;
+    }
+    if (userDataRaw.email) {
+      userDto.email = userDataRaw.email;
+    }
 
     await this.userService.updateUser(userDataRaw.id, userDto);
   }

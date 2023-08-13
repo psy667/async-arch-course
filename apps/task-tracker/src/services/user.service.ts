@@ -5,6 +5,7 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { EntityManager } from '@mikro-orm/core';
 import { ChangeRoleDto } from '../dto/change-role.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -38,7 +39,7 @@ export class UserService {
     return this.userRepository.getEntityManager().removeAndFlush({ id });
   }
 
-  async updateUser(id: string, userDto: CreateUserDto) {
+  async updateUser(id: string, userDto: UpdateUserDto) {
     const user = await this.userRepository.findOne(id);
     Object.entries(userDto).forEach(([key, value]) => {
       user[key] = value;
