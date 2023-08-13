@@ -12,6 +12,7 @@ import { User } from './entities/user.entity';
 import { UserService } from './services/user.service';
 import { KafkaModule } from '@app/common/kafka/kafka.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { UserCudConsumer } from './users-cud.consumer';
 
 @Module({
   imports: [
@@ -58,7 +59,13 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     KafkaModule,
   ],
   controllers: [TaskTrackerController],
-  providers: [TaskTrackerService, UserService, UsersConsumer, JwtStrategy],
+  providers: [
+    TaskTrackerService,
+    UserService,
+    UsersConsumer,
+    UserCudConsumer,
+    JwtStrategy,
+  ],
   exports: [TaskTrackerService, UserService],
 })
 export class TaskTrackerModule {}
