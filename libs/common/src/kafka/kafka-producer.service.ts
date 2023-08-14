@@ -24,6 +24,7 @@ export class KafkaProducerService
   }
 
   async produce(record: ProducerRecord) {
-    await this.producer.send(record);
+    console.log({ producerRecord: record });
+    return await this.producer.send(record);
   }
 }
