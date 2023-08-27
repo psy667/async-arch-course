@@ -24,6 +24,18 @@ services:
       - .:/usr/src/app
     env_file:
       - ./apps/auth/.env
+  accounting:
+    build:
+      context: .
+      dockerfile: ./apps/accounting/Dockerfile
+      target: development
+    command: npm run start:debug accounting
+    ports:
+      - '3202:3202'
+    volumes:
+      - .:/usr/src/app
+    env_file:
+      - ./apps/accounting/.env
   auth-db:
     image: postgres:13.1-alpine
     ports:
@@ -44,35 +56,42 @@ services:
       POSTGRES_DB: task-tracker
     volumes:
       - dbdata-task-tracker:/var/lib/postgresql/data
+  accounting-db:
+    image: postgres:13.1-alpine
+    ports:
+      - '5434:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: accounting
+    volumes:
+      - dbdata-accounting:/var/lib/postgresql/data
 
   zookeeper:
-    image: confluentinc/cp-zookeeper
-    hostname: zookeeper
-    extra_hosts:
-      - "moby:127.0.0.1"
-    ports:
-      - "2181:2181"
+    image: confluentinc/cp-zookeeper:latest
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 22181:2181
 
   kafka:
-    image: confluentinc/cp-kafka
-    hostname: broker
-    extra_hosts:
-      - "moby:127.0.0.1"
+    image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
     ports:
-      - '9092:9092'
+      - 29092:29092
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://broker:9092'
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
 
 volumes:
   dbdata-auth:
   dbdata-task-tracker:
+  dbdata-accounting:
 
