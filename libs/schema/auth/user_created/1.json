@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+
+  "type": "object",
+  "title": "auth.user_created.v1",
+  "description": "User created CUD event",
+
+  "definitions": {
+    "event_data": {
+      "type": "object",
+      "$id": "#event_data",
+      "properties": {
+        "user_id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": {
+          "type": "string",
+          "enum": [ "admin", "manager", "employee" ]
+        }
+      },
+      "required": [
+        "user_id",
+        "name",
+        "email",
+        "role"
+      ]
+    }
+  },
+  "properties": {
+    "event_id": { "type": "string" },
+    "event_version": { "type": "integer" },
+    "event_name": { "type": "string" },
+    "event_timestamp": { "type": "integer" },
+    "producer": { "type": "string" },
+    "data": {"$ref": "#/definitions/event_data"}
+  },
+  "required": [
+    "event_id",
+    "event_version",
+    "event_name",
+    "event_timestamp",
+    "producer",
+    "data"
+  ]
+}

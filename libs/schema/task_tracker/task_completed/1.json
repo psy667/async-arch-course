@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+
+  "type": "object",
+  "title": "task_tracker.task_completed.v1",
+  "description": "Task completed event",
+
+  "definitions": {
+    "event_data": {
+      "type": "object",
+      "$id": "#event_data",
+      "properties": {
+        "task_id": { "type": "string" }
+      },
+      "required": [
+        "task_id"
+      ]
+    }
+  },
+  "properties": {
+    "event_id": { "type": "string" },
+    "event_version": { "type": "integer" },
+    "event_name": { "type": "string" },
+    "event_timestamp": { "type": "integer" },
+    "producer": { "type": "string" },
+    "data": {"$ref": "#/definitions/event_data"}
+  },
+  "required": [
+    "event_id",
+    "event_version",
+    "event_name",
+    "event_timestamp",
+    "producer",
+    "data"
+  ]
+}

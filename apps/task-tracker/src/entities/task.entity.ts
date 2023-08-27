@@ -17,6 +17,12 @@ export class Task {
   @Property()
   status: TaskStatus;
 
+  @Property({ type: 'numeric(10, 2)' })
+  reward: number;
+
+  @Property({ type: 'numeric(10, 2)' })
+  fee: number;
+
   @ManyToOne(() => User)
   assignedTo: User;
 

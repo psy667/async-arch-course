@@ -1,5 +1,6 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 import { v4 } from 'uuid';
+import { UserRoleEnum } from '@app/common/events';
 
 @Entity()
 export class User {
@@ -16,7 +17,7 @@ export class User {
   beak!: string;
 
   @Property({ type: 'text' })
-  role: string;
+  role: UserRoleEnum;
 
   @Property()
   createdAt = new Date();

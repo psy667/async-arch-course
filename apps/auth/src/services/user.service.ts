@@ -25,19 +25,16 @@ export class UserService {
 
     const createdUser = await this.userRepository.findOne(user.id);
 
-    await this.kafkaProducerService.produce({
-      topic: 'users-cud',
-      messages: [
-        {
-          key: 'user_created',
-          value: JSON.stringify({
-            id: createdUser.id,
-            name: createdUser.name,
-            email: createdUser.email,
-            role: createdUser.role,
-          }),
-        },
-      ],
+    await this.kafkaProducerService.produceEvent('users_streaming', {
+      event_version: 1,
+      producer: 'auth',
+      event_name: 'auth.user_created',
+      data: {
+        user_id: createdUser.id,
+        name: createdUser.name,
+        email: createdUser.email,
+        role: createdUser.role,
+      },
     });
 
     return user;
@@ -52,14 +49,16 @@ export class UserService {
 
     await this.userRepository.getEntityManager().persistAndFlush(user);
 
-    await this.kafkaProducerService.produce({
-      topic: 'users-cud',
-      messages: [
-        {
-          key: 'user_updated',
-          value: JSON.stringify({ ...updateUserDto, id }),
-        },
-      ],
+    await this.kafkaProducerService.produceEvent('users_streaming', {
+      event_version: 1,
+      producer: 'auth',
+      event_name: 'auth.user_updated',
+      data: {
+        user_id: id,
+        role: user.role,
+        name: user.name,
+        email: user.email,
+      },
     });
 
     return user;
@@ -72,37 +71,30 @@ export class UserService {
 
     await this.userRepository.getEntityManager().persistAndFlush(user);
 
-    await this.kafkaProducerService.produce({
-      topic: 'users',
-      messages: [
-        {
-          key: 'user_role_updated',
-          value: JSON.stringify({ id, newRole: changeRoleDto.role }),
-        },
-      ],
+    await this.kafkaProducerService.produceEvent('users_streaming', {
+      event_version: 1,
+      producer: 'auth',
+      event_name: 'auth.user_updated',
+      data: {
+        user_id: id,
+        role: user.role,
+        name: user.name,
+        email: user.email,
+      },
+    });
+
+    await this.kafkaProducerService.produceEvent('users', {
+      event_version: 1,
+      producer: 'auth',
+      event_name: 'auth.role_changed',
+      data: {
+        user_id: id,
+        role: changeRoleDto.role,
+      },
     });
 
     return user;
   }
-
-  async delete(id: string): Promise<string> {
-    const user = await this.userRepository.findOne(id);
-
-    await this.userRepository.getEntityManager().removeAndFlush(user);
-
-    await this.kafkaProducerService.produce({
-      topic: 'users-cud',
-      messages: [
-        {
-          key: 'user_deleted',
-          value: JSON.stringify({ id }),
-        },
-      ],
-    });
-
-    return id;
-  }
-
   findAll(): Promise<User[]> {
     return this.userRepository.findAll();
   }

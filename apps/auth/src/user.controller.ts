@@ -66,13 +66,6 @@ export class UserController {
     return this.userService.update(id, updateUserDto);
   }
 
-  @Delete(':id')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, AdminRoleGuard)
-  delete(@Param('id') id: string) {
-    return this.userService.delete(id);
-  }
-
   @Put(':id/change-role')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, AdminRoleGuard)
