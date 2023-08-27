@@ -1,18 +1,19 @@
 import { Module } from '@nestjs/common';
-import { TaskTrackerService } from './services/task-tracker.service';
-import { TaskTrackerController } from './task-tracker.controller';
-import { UsersConsumer } from './users.consumer';
+import { AccountingController } from './accounting.controller';
+import { AccountingService } from './services/accounting.service';
+import { KafkaService } from './services/kafka.service';
+import { TasksConsumer } from './tasks.consumer';
+import { TaskStreamService } from './services/task-stream.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { LoadStrategy } from '@mikro-orm/core';
-import { Task } from './entities/task.entity';
-import { User } from './entities/user.entity';
-import { UserService } from './services/user.service';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { KafkaService } from './kafka.service';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { Transaction } from './entities/transaction.entity';
+import { Task } from './entities/task.entity';
+import { Account } from './entities/account.entity';
+import { UsersConsumer } from './users.consumer';
 import { KafkaConsumerService } from '@app/common/kafka/kafka-consumer.service';
 import { KafkaProducerService } from '@app/common/kafka/kafka-producer.service';
 
@@ -43,7 +44,7 @@ import { KafkaProducerService } from '@app/common/kafka/kafka-producer.service';
     MikroOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        entities: [User],
+        entities: [Task, Account, Transaction],
         dbName: configService.get<string>('POSTGRES_DB'),
         user: configService.get<string>('POSTGRES_USER'),
         password: configService.get<string>('POSTGRES_PASSWORD'),
@@ -57,15 +58,15 @@ import { KafkaProducerService } from '@app/common/kafka/kafka-producer.service';
         // metadataProvider: TsMorphMetadataProvider,
       }),
     }),
-    MikroOrmModule.forFeature({ entities: [User, Task] }),
+    MikroOrmModule.forFeature({ entities: [Account, Transaction, Task] }),
     EventEmitterModule.forRoot(),
   ],
-  controllers: [TaskTrackerController],
+  controllers: [AccountingController],
   providers: [
-    TaskTrackerService,
-    UserService,
+    AccountingService,
+    TasksConsumer,
+    TaskStreamService,
     UsersConsumer,
-    JwtStrategy,
     KafkaService,
     {
       provide: KafkaConsumerService,
@@ -76,6 +77,5 @@ import { KafkaProducerService } from '@app/common/kafka/kafka-producer.service';
       useClass: KafkaProducerService,
     },
   ],
-  exports: [TaskTrackerService, UserService],
 })
-export class TaskTrackerModule {}
+export class AccountingModule {}

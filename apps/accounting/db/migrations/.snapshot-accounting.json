@@ -15,32 +15,14 @@
           "nullable": false,
           "mappedType": "uuid"
         },
-        "name": {
-          "name": "name",
+        "user_id": {
+          "name": "user_id",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "mappedType": "string"
-        },
-        "email": {
-          "name": "email",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "string"
-        },
-        "role": {
-          "name": "role",
-          "type": "text",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "text"
         },
         "created_at": {
           "name": "created_at",
@@ -51,41 +33,13 @@
           "nullable": false,
           "length": 6,
           "mappedType": "datetime"
-        },
-        "task_reward": {
-          "name": "task_reward",
-          "type": "int",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "mappedType": "integer"
-        },
-        "task_fee": {
-          "name": "task_fee",
-          "type": "int",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "mappedType": "integer"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamptz(0)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 6,
-          "mappedType": "datetime"
         }
       },
-      "name": "user",
+      "name": "account",
       "schema": "public",
       "indexes": [
         {
-          "keyName": "user_pkey",
+          "keyName": "account_pkey",
           "columnNames": [
             "id"
           ],
@@ -126,6 +80,15 @@
           "nullable": false,
           "mappedType": "string"
         },
+        "assigned_to": {
+          "name": "assigned_to",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "string"
+        },
         "reward": {
           "name": "reward",
           "type": "numeric(10,0)",
@@ -148,24 +111,6 @@
           "scale": 0,
           "mappedType": "decimal"
         },
-        "assigned_to_id": {
-          "name": "assigned_to_id",
-          "type": "uuid",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "uuid"
-        },
-        "created_by_id": {
-          "name": "created_by_id",
-          "type": "uuid",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "uuid"
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz(0)",
@@ -187,25 +132,6 @@
           "length": 6,
           "default": "'now()'",
           "mappedType": "datetime"
-        },
-        "completed_at": {
-          "name": "completed_at",
-          "type": "timestamptz(0)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "length": 6,
-          "mappedType": "datetime"
-        },
-        "completed_by": {
-          "name": "completed_by",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "mappedType": "string"
         }
       },
       "name": "task",
@@ -222,29 +148,91 @@
         }
       ],
       "checks": [],
-      "foreignKeys": {
-        "task_assigned_to_id_foreign": {
-          "constraintName": "task_assigned_to_id_foreign",
-          "columnNames": [
-            "assigned_to_id"
-          ],
-          "localTableName": "public.task",
-          "referencedColumnNames": [
-            "id"
-          ],
-          "referencedTableName": "public.user",
-          "updateRule": "cascade"
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
         },
-        "task_created_by_id_foreign": {
-          "constraintName": "task_created_by_id_foreign",
+        "credit": {
+          "name": "credit",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "debit": {
+          "name": "debit",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "string"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        }
+      },
+      "name": "transaction",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "transaction_pkey",
           "columnNames": [
-            "created_by_id"
+            "id"
           ],
-          "localTableName": "public.task",
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "transaction_account_id_foreign": {
+          "constraintName": "transaction_account_id_foreign",
+          "columnNames": [
+            "account_id"
+          ],
+          "localTableName": "public.transaction",
           "referencedColumnNames": [
             "id"
           ],
-          "referencedTableName": "public.user",
+          "referencedTableName": "public.account",
           "updateRule": "cascade"
         }
       }

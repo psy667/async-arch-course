@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { CanActivate, ExecutionContext } from '@nestjs/common';
-import { UserRoleEnum } from '../models/user-role.enum';
+import { UserRoleEnum } from '@app/common/events';
 
 export class AdminRoleGuard implements CanActivate {
   canActivate(
