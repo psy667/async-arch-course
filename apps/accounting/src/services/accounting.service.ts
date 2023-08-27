@@ -4,6 +4,7 @@ import { Transaction } from '../entities/transaction.entity';
 import { Account } from '../entities/account.entity';
 import { Task } from '../entities/task.entity';
 import { UserRoleEnum } from '@app/common/events';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class AccountingService {
@@ -86,5 +87,33 @@ export class AccountingService {
     });
 
     await this.em.persistAndFlush(userEntity);
+  }
+
+  async payoutForAccount(account_id: string) {
+    const account = await this.em.getRepository(Account).findOne(account_id);
+
+    const accountBalance = await this.getBalance(account_id);
+
+    if (accountBalance.balance <= 0) {
+      return;
+    }
+
+    const transaction = new Transaction();
+
+    transaction.account = account;
+    transaction.debit = accountBalance.balance;
+    transaction.credit = 0;
+    transaction.description = `Payout to ${account.user_id}`;
+
+    await this.em.persistAndFlush(transaction);
+  }
+
+  @Cron('0 30 11 * * 1-5')
+  async payoutForAllAccounts() {
+    const accounts = await this.em.getRepository(Account).findAll();
+
+    for (const account of accounts) {
+      await this.payoutForAccount(account.id);
+    }
   }
 }

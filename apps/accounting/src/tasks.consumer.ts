@@ -27,6 +27,16 @@ export class TasksConsumer {
     await this.taskStreamService.taskUpdated(payload.data);
   }
 
+  @OnEvent('task_tracker.task_created.v2' satisfies EventNameAndVersion)
+  async handleTaskCreatedV2(payload: TaskCreatedV1Event) {
+    await this.taskStreamService.taskCreated(payload.data);
+  }
+
+  @OnEvent('task_tracker.task_updated.v2' satisfies EventNameAndVersion)
+  async handleTaskUpdatedV2(payload: TaskUpdatedV1Event) {
+    await this.taskStreamService.taskUpdated(payload.data);
+  }
+
   @OnEvent('task_tracker.task_assigned.v1' satisfies EventNameAndVersion)
   async handleTaskAssigned(payload: TaskAssignedV1Event) {
     await this.accountingService.taskAssigned(payload.data);

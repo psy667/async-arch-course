@@ -10,6 +10,7 @@ export class TaskStreamService {
   async taskCreated(data: {
     task_id: string;
     task_description: string;
+    task_ticket?: string;
     task_assigned_to: string;
     task_status: TaskStatusEnum;
     task_reward: number;
@@ -18,6 +19,7 @@ export class TaskStreamService {
     const task = new Task();
     task.id = data.task_id;
     task.description = data.task_description;
+    task.ticket = data.task_ticket;
     task.assigned_to = data.task_assigned_to;
     task.status = data.task_status;
     task.reward = data.task_reward;
@@ -29,6 +31,7 @@ export class TaskStreamService {
   async taskUpdated(data: {
     task_id: string;
     task_description: string;
+    task_ticket?: string;
     task_status: TaskStatusEnum;
     task_assigned_to: string;
     task_reward: number;
@@ -36,6 +39,7 @@ export class TaskStreamService {
   }) {
     const task = await this.em.getRepository(Task).findOne(data.task_id);
     task.description = data.task_description;
+    task.ticket = data.task_ticket;
     task.status = data.task_status;
     task.assigned_to = data.task_assigned_to;
     task.reward = data.task_reward;

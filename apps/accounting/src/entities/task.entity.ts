@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 
 @Entity()
 export class Task {
@@ -7,6 +7,9 @@ export class Task {
 
   @Property()
   description: string;
+
+  @Property({ nullable: true })
+  ticket: string;
 
   @Property()
   status: string;

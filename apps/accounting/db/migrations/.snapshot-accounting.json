@@ -71,6 +71,15 @@
           "nullable": false,
           "mappedType": "string"
         },
+        "ticket": {
+          "name": "ticket",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "string"
+        },
         "status": {
           "name": "status",
           "type": "varchar(255)",

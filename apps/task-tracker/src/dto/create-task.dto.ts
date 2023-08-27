@@ -1,7 +1,11 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, NotContains } from 'class-validator';
 
 export class CreateTaskDto {
-  @IsString()
   @IsNotEmpty()
+  @IsString()
+  @NotContains('[]', { message: 'Description should not contain [] symbols' })
   description: string;
+
+  @IsString()
+  ticket: string;
 }

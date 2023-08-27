@@ -9,8 +9,10 @@ import {
   TaskAssignedV1Event,
   TaskCompletedV1Event,
   TaskCreatedV1Event,
+  TaskCreatedV2Event,
   TaskStatusEnum,
   TaskUpdatedV1Event,
+  TaskUpdatedV2Event,
 } from '@app/common/events';
 
 @Injectable()
@@ -26,21 +28,22 @@ export class TaskTrackerService {
     task.description = createTaskDto.description;
     task.status = TaskStatus.OPEN;
     task.assignedTo = await this.userService.selectRandomEmployee();
-    task.reward = this.calculateReward(createTaskDto.description);
-    task.fee = this.calculateFee(createTaskDto.description);
+    task.reward = this.calculateReward();
+    task.fee = this.calculateFee();
     task.createdBy = user;
     await this.entityManager.persistAndFlush(task);
 
-    await this.kafkaProducerService.produceEvent<TaskCreatedV1Event>(
+    await this.kafkaProducerService.produceEvent<TaskCreatedV2Event>(
       'task_tracker',
       {
         event_name: 'task_tracker.task_created',
         producer: 'task_tracker',
-        event_version: 1,
+        event_version: 2,
         data: {
           task_id: task.id,
           task_description: task.description,
           task_assigned_to: task.assignedTo.id,
+          task_ticket: task.ticket,
           task_status: task.status as unknown as TaskStatusEnum,
           task_fee: task.fee,
           task_reward: task.reward,
@@ -73,13 +76,14 @@ export class TaskTrackerService {
       console.log({ assignedTo: task.assignedTo });
 
       await this.kafkaProducerService
-        .produceEvent<TaskUpdatedV1Event>('task_tracker', {
+        .produceEvent<TaskUpdatedV2Event>('task_tracker', {
           event_name: 'task_tracker.task_updated',
           producer: 'task_tracker',
-          event_version: 1,
+          event_version: 2,
           data: {
             task_id: task.id,
             task_description: task.description,
+            task_ticket: task.ticket,
             task_status: task.status as unknown as TaskStatusEnum,
             task_assigned_to: task.assignedTo.id,
             task_fee: task.fee,
@@ -129,15 +133,16 @@ export class TaskTrackerService {
     task.status = TaskStatus.DONE;
     await this.entityManager.persistAndFlush(task);
 
-    await this.kafkaProducerService.produceEvent<TaskUpdatedV1Event>(
+    await this.kafkaProducerService.produceEvent<TaskUpdatedV2Event>(
       'task_tracker',
       {
         event_name: 'task_tracker.task_updated',
         producer: 'task_tracker',
-        event_version: 1,
+        event_version: 2,
         data: {
           task_id: task.id,
           task_description: task.description,
+          task_ticket: task.ticket,
           task_status: task.status as unknown as TaskStatusEnum,
           task_assigned_to: task.assignedTo.id,
           task_fee: task.fee,
@@ -172,13 +177,14 @@ export class TaskTrackerService {
       console.log({ assignedTo: task.assignedTo });
 
       this.kafkaProducerService
-        .produceEvent<TaskUpdatedV1Event>('task_tracker', {
+        .produceEvent<TaskUpdatedV2Event>('task_tracker', {
           event_name: 'task_tracker.task_updated',
           producer: 'task_tracker',
-          event_version: 1,
+          event_version: 2,
           data: {
             task_id: task.id,
             task_description: task.description,
+            task_ticket: task.ticket,
             task_status: task.status as unknown as TaskStatusEnum,
             task_assigned_to: task.assignedTo.id,
             task_fee: task.fee,
@@ -203,11 +209,11 @@ export class TaskTrackerService {
     await this.entityManager.persistAndFlush(assignedTasks);
   }
 
-  private calculateReward(description: string) {
+  private calculateReward() {
     return 20 + Math.round(Math.random() * 20);
   }
 
-  private calculateFee(description: string) {
+  private calculateFee() {
     return 10 + Math.round(Math.random() * 10);
   }
 }

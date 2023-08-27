@@ -60,12 +60,40 @@ export type TaskCreatedV1Event = Event & {
   };
 };
 
+export type TaskCreatedV2Event = Event & {
+  event_version: 2;
+  event_name: 'task_tracker.task_created';
+  data: {
+    task_id: string;
+    task_description: string;
+    task_ticket: string;
+    task_assigned_to: string;
+    task_status: TaskStatusEnum;
+    task_reward: number;
+    task_fee: number;
+  };
+};
+
 export type TaskUpdatedV1Event = Event & {
   event_version: 1;
   event_name: 'task_tracker.task_updated';
   data: {
     task_id: string;
     task_description: string;
+    task_status: TaskStatusEnum;
+    task_assigned_to: string;
+    task_reward: number;
+    task_fee: number;
+  };
+};
+
+export type TaskUpdatedV2Event = Event & {
+  event_version: 2;
+  event_name: 'task_tracker.task_updated';
+  data: {
+    task_id: string;
+    task_description: string;
+    task_ticket: string;
     task_status: TaskStatusEnum;
     task_assigned_to: string;
     task_reward: number;
@@ -111,7 +139,9 @@ export type AllEvents =
   | TaskCompletedV1Event
   | TransactionCreatedV1Event
   | UserCreatedV1Event
-  | UserUpdatedV1Event;
+  | UserUpdatedV1Event
+  | TaskCreatedV2Event
+  | TaskUpdatedV2Event;
 
 export type EventNames = AllEvents['event_name'];
 export type EventNameAndVersion = `${EventNames}.v${number}`;
