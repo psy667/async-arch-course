@@ -18,6 +18,12 @@ export class User {
   @Property()
   createdAt = new Date();
 
+  @Property({ nullable: true })
+  task_reward: number;
+
+  @Property({ nullable: true })
+  task_fee: number;
+
   @Property({ onUpdate: () => new Date() })
   updatedAt = new Date();
 

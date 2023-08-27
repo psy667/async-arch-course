@@ -6,6 +6,7 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { EntityManager } from '@mikro-orm/core';
 import { ChangeRoleDto } from '../dto/change-role.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
+import { UserRoleEnum } from '@app/common/events';
 
 @Injectable()
 export class UserService {
@@ -19,13 +20,17 @@ export class UserService {
     return this.userRepository
       .createQueryBuilder()
       .select('*')
+      .where({ role: UserRoleEnum.EMPLOYEE })
       .getKnexQuery()
       .orderByRaw('RANDOM()')
-      .limit(1);
+      .limit(1)
+      .then((it) => it[0]);
   }
 
   async createUser(userDto: CreateUserDto): Promise<User> {
     const user = this.userRepository.create({ ...userDto });
+
+    console.log({ user });
 
     await this.entityManager.persistAndFlush(user);
     return user;
@@ -39,21 +44,18 @@ export class UserService {
     return this.userRepository.getEntityManager().removeAndFlush({ id });
   }
 
-  async updateUser(id: string, userDto: UpdateUserDto) {
-    const user = await this.userRepository.findOne(id);
-    Object.entries(userDto).forEach(([key, value]) => {
-      user[key] = value;
-    });
+  async updateUser(params: {
+    role: UserRoleEnum;
+    name: string;
+    id: string;
+    email: string;
+  }) {
+    const user = await this.userRepository.findOne(params.id);
+    user.role = params.role;
+    user.name = params.name;
+    user.email = params.email;
+
     await this.userRepository.getEntityManager().persistAndFlush(user);
-    return user;
-  }
-
-  async changeRole(changeRoleDto: ChangeRoleDto) {
-    const user = await this.userRepository.findOne(changeRoleDto.userId);
-
-    user.role = changeRoleDto.role;
-    await this.userRepository.getEntityManager().persistAndFlush(user);
-
     return user;
   }
 }

@@ -3,7 +3,7 @@ import { UserService } from './user.service';
 import { LoginDto } from '../dto/login.dto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { UserRoleEnum } from '../models/user-role.enum';
+import { UserRoleEnum } from '@app/common/events';
 
 @Injectable()
 export class AuthService {

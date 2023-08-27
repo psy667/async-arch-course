@@ -16,6 +16,7 @@ import { Account } from './entities/account.entity';
 import { UsersConsumer } from './users.consumer';
 import { KafkaConsumerService } from '@app/common/kafka/kafka-consumer.service';
 import { KafkaProducerService } from '@app/common/kafka/kafka-producer.service';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { KafkaProducerService } from '@app/common/kafka/kafka-producer.service';
     }),
     MikroOrmModule.forFeature({ entities: [Account, Transaction, Task] }),
     EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
   ],
   controllers: [AccountingController],
   providers: [
