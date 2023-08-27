@@ -10,7 +10,8 @@ import { User } from './entities/user.entity';
 import { LoadStrategy, MikroORM } from '@mikro-orm/core';
 import { UserController } from './user.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { KafkaModule } from '@app/common/kafka/kafka.module';
+import { KafkaConsumerService } from '@app/common/kafka/kafka-consumer.service';
+import { KafkaProducerService } from '@app/common/kafka/kafka-producer.service';
 
 @Module({
   imports: [
@@ -53,10 +54,21 @@ import { KafkaModule } from '@app/common/kafka/kafka.module';
       }),
     }),
     MikroOrmModule.forFeature({ entities: [User] }),
-    KafkaModule,
   ],
   controllers: [AuthController, UserController],
-  providers: [AuthService, UserService, JwtStrategy],
+  providers: [
+    AuthService,
+    UserService,
+    JwtStrategy,
+    {
+      provide: KafkaConsumerService,
+      useClass: KafkaConsumerService,
+    },
+    {
+      provide: KafkaProducerService,
+      useClass: KafkaProducerService,
+    },
+  ],
 })
 export class AuthModule {
   constructor(private readonly orm: MikroORM) {}

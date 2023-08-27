@@ -1,19 +1,19 @@
 import { NestFactory } from '@nestjs/core';
-import { AuthModule } from './auth.module';
-import { ValidationPipe } from '@nestjs/common';
+import { AccountingModule } from './accounting.module';
 import { ConfigService } from '@nestjs/config';
+import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AuthModule);
+  const app = await NestFactory.create(AccountingModule);
   const configService = app.get(ConfigService);
   app.enableCors();
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   const config = new DocumentBuilder()
-    .setTitle('ATES Auth')
-    .setDescription('The Awesome Task Tracker Auth Service API description')
+    .setTitle('ATES Accounting')
+    .setDescription('The Awesome Task Tracker API description')
     .setVersion('v1')
     .addBearerAuth()
     .addTag('popug')
@@ -28,4 +28,4 @@ async function bootstrap() {
   await app.startAllMicroservices();
   await app.listen(port);
 }
-bootstrap().then((r) => console.log('Auth started'));
+bootstrap();

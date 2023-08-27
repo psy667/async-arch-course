@@ -21,7 +21,7 @@ const dotenv = require('dotenv');
 
   const orm = await MikroORM.init({
     host: 'localhost',
-    port: 5433,
+    port: parseInt(process.env.POSTGRES_PORT),
     user: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
     dbName: process.env.POSTGRES_DB,
@@ -33,7 +33,7 @@ const dotenv = require('dotenv');
     metadataProvider: TsMorphMetadataProvider,
     migrations: {
       tableName: 'mikro_orm_migrations', // name of database table with log of executed transactions
-      path: './migrations', // path to the folder with migrations
+      path: './db/migrations', // path to the folder with migrations
       pathTs: undefined, // path to the folder with TS migrations (if used, we should put path to compiled files in `path`)
       glob: '!(*.d).{js,ts}', // how to match migration files (all .js and .ts files, but not .d.ts)
       transactional: true, // wrap each migration in a transaction

@@ -4,7 +4,7 @@ function User({ user, isSelected }) {
 
   return (
     <div
-      class="flex items-center px-2 py-2"
+      class="flex items-center px-2 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
       classList={{
         'bg-gray-200 dark:bg-gray-700': isSelected(),
       }}
@@ -107,6 +107,22 @@ function UsersPage() {
     setRefreshUsers((x) => x + 1);
   };
 
+  const changeUserEmail = async (e) => {
+    const jwt = localStorage.getItem('token');
+    const headers = jwt ? { Authorization: `Bearer ${jwt}` } : {};
+
+    const res = await fetch(`http://localhost:3201/user/${selectedUserId()}`, {
+      method: 'PUT',
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email: e.currentTarget.value }),
+    });
+    await res.json();
+    setRefreshUsers((x) => x + 1);
+  };
+
   return (
     <div class="flex m-4">
       <div class="">
@@ -142,22 +158,33 @@ function UsersPage() {
           }
         >
           <div class="px-4 py-5 sm:px-6">
-            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-              {selectedUser()?.name}
-            </h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
+              Name
+            </p>
             <input
               type="text"
               placeholder="Name"
               value={selectedUser()?.name}
-              class="border-1 w-full border-gray-300 dark:border-gray-700 rounded-lg p-1 m-2"
+              class="border-1 w-full border-gray-300 dark:border-gray-700 rounded-lg p-1 mt-1"
               onChange={changeUserName}
             />
-            <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
-              {selectedUser()?.email}
+            <p class="max-w-2xl text-sm text-gray-500 dark:text-gray-400 mt-4">
+              Email
+            </p>
+            <input
+              type="text"
+              placeholder="Email"
+              value={selectedUser()?.email}
+              class="border-1 w-full border-gray-300 dark:border-gray-700 rounded-lg p-1 mt-1"
+              onChange={changeUserEmail}
+            />
+
+            <p class="mt-4 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
+              Role
             </p>
             <div>
               <select
-                class="my-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                class="mt-1 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 value={selectedUser()?.role}
                 onChange={changeUserRole()}
               >
